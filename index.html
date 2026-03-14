@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#c42e1e"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Labora Admin"/>
+<title>Labora — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#16181f;--sur:#1e2130;--sur2:#262a3a;--sur3:#2e3348;
+  --brd:#363c52;--brd2:#464d68;
+  --tx:#e8eaf0;--tx2:#9ba3b8;--tx3:#5c6480;
+  --acc:#e05a4a;--acc-bg:#3a1f1c;
+  --easy:#3dba6f;--easy-bg:#1a3328;
+  --mid:#f0a040;--mid-bg:#332810;
+  --hard:#a070e8;--r:12px
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx)}
+button,input,select,textarea{font-family:inherit;-webkit-tap-highlight-color:transparent}
+button{touch-action:manipulation;cursor:pointer}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── LOCK SCREEN ── */
+#screen-lock{
+  align-items:center;justify-content:center;
+  padding:40px 24px;gap:32px;
+  background:var(--bg)
+}
+.lock-logo{
+  width:80px;height:80px;border-radius:22px;
+  background:linear-gradient(145deg,#f07050,#c42e1e);
+  display:flex;align-items:center;justify-content:center
+}
+.lock-logo svg{width:46px;height:46px}
+.lock-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--tx);text-align:center}
+.lock-sub{font-size:14px;color:var(--tx3);text-align:center;margin-top:4px}
+.lock-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px}
+.lock-input{
+  width:100%;padding:14px 16px;border-radius:var(--r);
+  border:1.5px solid var(--brd);background:var(--sur2);
+  color:var(--tx);font-size:16px;text-align:center;
+  letter-spacing:4px;transition:border-color .15s
+}
+.lock-input:focus{outline:none;border-color:var(--acc)}
+.lock-btn{
+  width:100%;padding:14px;border-radius:var(--r);
+  background:var(--acc);border:none;color:#fff;
+  font-size:15px;font-weight:600;transition:opacity .15s
+}
+.lock-btn:active{opacity:.8}
+.lock-err{font-size:13px;color:var(--acc);text-align:center;min-height:18px}
+.lock-hint{font-size:12px;color:var(--tx3);text-align:center}
+.lock-setup-link{
+  font-size:13px;color:var(--tx3);text-align:center;
+  background:none;border:none;text-decoration:underline;padding:4px
+}
+
+/* ── SETUP SCREEN ── */
+#screen-setup{padding:0;background:var(--bg)}
+.setup-hdr{
+  padding:calc(16px + env(safe-area-inset-top)) 16px 14px;
+  background:var(--sur);border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;gap:12px;flex-shrink:0
+}
+.setup-hdr h1{font-family:'DM Serif Display',serif;font-size:20px;color:var(--tx);flex:1}
+.setup-body{flex:1;padding:20px 16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.setup-card{background:var(--sur);border:1px solid var(--brd);border-radius:14px;padding:16px}
+.setup-card h3{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:4px}
+.setup-card p{font-size:12.5px;color:var(--tx3);line-height:1.5;margin-bottom:12px}
+.setup-card a{color:var(--acc)}
+.fi{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.fi label{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px}
+.fi input,.fi select{
+  padding:11px 13px;border-radius:var(--r);border:1.5px solid var(--brd);
+  background:var(--sur2);color:var(--tx);font-size:16px;transition:border-color .15s
+}
+.fi input:focus,.fi select:focus{outline:none;border-color:var(--acc)}
+.fi input[type="password"]{letter-spacing:3px}
+.btn-primary{
+  width:100%;padding:14px;border-radius:var(--r);
+  background:var(--acc);border:none;color:#fff;
+  font-size:15px;font-weight:600;margin-top:4px
+}
+.btn-primary:active{opacity:.8}
+.btn-sec{
+  padding:11px 16px;border-radius:var(--r);
+  background:var(--sur2);border:1px solid var(--brd2);color:var(--tx2);
+  font-size:14px;font-weight:500
+}
+.btn-sec:active{opacity:.8}
+
+/* ── MAIN SCREEN ── */
+#screen-main{background:var(--bg)}
+.main-hdr{
+  padding:calc(12px + env(safe-area-inset-top)) 16px 10px;
+  background:var(--sur);border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+  position:sticky;top:0;z-index:100
+}
+.main-hdr-logo{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(145deg,#f07050,#c42e1e);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0
+}
+.main-hdr-logo svg{width:20px;height:20px}
+.main-hdr h1{font-family:'DM Serif Display',serif;font-size:18px;color:var(--tx);flex:1}
+.hdr-badge{
+  font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;
+  background:var(--easy-bg);color:var(--easy);flex-shrink:0
+}
+.main-toolbar{
+  padding:10px 14px;background:var(--bg);
+  display:flex;gap:8px;align-items:center;flex-shrink:0;
+  border-bottom:1px solid var(--brd)
+}
+.sync-status{font-size:12px;color:var(--tx3);flex:1;line-height:1.3}
+.sync-status span{display:block}
+.sync-status .ok{color:var(--easy)}
+.sync-status .err{color:var(--acc)}
+.btn-sync{
+  padding:9px 14px;border-radius:10px;
+  background:var(--easy-bg);border:1px solid rgba(61,186,111,.3);
+  color:var(--easy);font-size:13px;font-weight:600;white-space:nowrap;flex-shrink:0
+}
+.btn-sync:active{opacity:.7}
+.btn-sync:disabled{opacity:.4;cursor:not-allowed}
+.btn-add-job{
+  padding:9px 14px;border-radius:10px;
+  background:var(--acc);border:none;
+  color:#fff;font-size:13px;font-weight:600;white-space:nowrap;flex-shrink:0
+}
+.btn-add-job:active{opacity:.8}
+#job-list{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+.job-row{
+  background:var(--sur);border:1px solid var(--brd);
+  border-left:3px solid var(--brd2);
+  border-radius:12px;padding:12px 13px;
+  display:flex;align-items:center;gap:10px
+}
+.job-row[data-diff="easy"]{border-left-color:var(--easy)}
+.job-row[data-diff="medium"]{border-left-color:var(--mid)}
+.job-row[data-diff="hard"]{border-left-color:var(--hard)}
+.job-row-info{flex:1;min-width:0}
+.job-row-title{font-size:13.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job-row-meta{font-size:11.5px;color:var(--tx3);margin-top:2px}
+.job-row-salary{font-size:13px;font-weight:700;color:var(--easy);flex-shrink:0;text-align:right}
+.job-row-actions{display:flex;gap:6px;flex-shrink:0}
+.btn-edit,.btn-del{
+  width:34px;height:34px;border-radius:8px;border:none;
+  display:flex;align-items:center;justify-content:center;font-size:16px
+}
+.btn-edit{background:var(--sur2);color:var(--tx2)}
+.btn-del{background:var(--acc-bg);color:var(--acc)}
+.btn-edit:active,.btn-del:active{opacity:.7}
+.empty-state{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:10px;padding:40px 20px;color:var(--tx3)
+}
+.empty-state div:first-child{font-size:40px}
+.empty-state p{font-size:14px;text-align:center;line-height:1.5}
+
+/* ── FORM MODAL ── */
+#modal-form{
+  position:fixed;inset:0;z-index:900;
+  background:rgba(0,0,0,.7);
+  display:none;align-items:flex-end
+}
+#modal-form.open{display:flex}
+.form-sheet{
+  width:100%;max-height:92vh;overflow-y:auto;
+  background:var(--sur);border-radius:20px 20px 0 0;
+  display:flex;flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom);
+  -webkit-overflow-scrolling:touch
+}
+.form-sheet::before{
+  content:'';display:block;width:40px;height:4px;
+  border-radius:999px;background:var(--brd2);
+  margin:12px auto 0;flex-shrink:0
+}
+.form-hdr{
+  padding:14px 16px 12px;border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0
+}
+.form-hdr h2{font-family:'DM Serif Display',serif;font-size:18px;color:var(--tx)}
+.form-x{
+  width:30px;height:30px;border-radius:50%;background:var(--sur2);
+  border:none;font-size:16px;color:var(--tx2);
+  display:flex;align-items:center;justify-content:center
+}
+.form-body{padding:14px 16px;display:flex;flex-direction:column;gap:2px;flex:1}
+.form-row{display:flex;gap:10px}
+.form-row .fi{flex:1}
+.fi textarea{
+  padding:11px 13px;border-radius:var(--r);border:1.5px solid var(--brd);
+  background:var(--sur2);color:var(--tx);font-size:14px;
+  resize:vertical;min-height:72px;line-height:1.5;
+  transition:border-color .15s;width:100%
+}
+.fi textarea:focus{outline:none;border-color:var(--acc)}
+.form-foot{
+  padding:12px 16px calc(14px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--brd);display:flex;gap:8px;flex-shrink:0
+}
+.form-foot .btn-primary{flex:2;margin:0}
+.form-foot .btn-sec{flex:1}
+.toast{
+  position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));
+  left:50%;transform:translateX(-50%);
+  background:var(--sur3);border:1px solid var(--brd2);
+  border-radius:999px;padding:10px 20px;
+  font-size:13px;font-weight:500;color:var(--tx);
+  box-shadow:0 4px 20px rgba(0,0,0,.5);
+  z-index:1000;white-space:nowrap;
+  opacity:0;transition:opacity .2s;pointer-events:none
+}
+.toast.show{opacity:1}
+.toast.ok{border-color:rgba(61,186,111,.4);color:var(--easy)}
+.toast.err{border-color:rgba(224,90,74,.4);color:var(--acc)}
+.map-hint{font-size:11px;color:var(--tx3);font-style:italic;margin-top:-6px;margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     LOCK SCREEN
+══════════════════════════════ -->
+<div id="screen-lock" class="screen active">
+  <div class="lock-logo">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect x="8" y="28" width="48" height="27" rx="6" stroke="white" stroke-width="3.8" fill="none"/>
+      <path d="M22 28V24a6 6 0 016-6h8a6 6 0 016 6v4" stroke="white" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+      <line x1="8" y1="42" x2="56" y2="42" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+      <rect x="27" y="38" width="10" height="8" rx="2.5" fill="white"/>
+      <path d="M32 24V16M28 20l4-4 4 4" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div>
+    <div class="lock-title">Labora Admin</div>
+    <div class="lock-sub">Panel de gestión de empleos</div>
+  </div>
+  <div class="lock-form">
+    <input class="lock-input" type="password" id="pwd-input" placeholder="••••••••" autocomplete="current-password"/>
+    <div class="lock-err" id="lock-err"></div>
+    <button class="lock-btn" onclick="doLogin()">Entrar</button>
+    <button class="lock-setup-link" onclick="goSetup()">⚙️ Configurar JSONBin</button>
+  </div>
+  <div class="lock-hint">Solo tú tienes acceso a esta app</div>
+</div>
+
+<!-- ══════════════════════════════
+     SETUP SCREEN
+══════════════════════════════ -->
+<div id="screen-setup" class="screen">
+  <div class="setup-hdr">
+    <button class="btn-sec" onclick="goLock()" style="padding:8px 12px">← Volver</button>
+    <h1>Configuración</h1>
+  </div>
+  <div class="setup-body">
+
+    <div class="setup-card">
+      <h3>🔐 Contraseña de acceso</h3>
+      <p>Esta contraseña protege la app. Cámbiala por una segura.</p>
+      <div class="fi"><label>Contraseña</label><input type="password" id="set-pwd" placeholder="Nueva contraseña"/></div>
+    </div>
+
+    <div class="setup-card">
+      <h3>📦 JSONBin — conexión de datos</h3>
+      <p>
+        1. Ve a <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> y crea una cuenta gratis.<br/>
+        2. Crea un nuevo <strong>Bin</strong> con el contenido <code>[]</code>.<br/>
+        3. Copia el <strong>Bin ID</strong> (en la URL) y tu <strong>Master Key</strong> (en Account → API Keys).
+      </p>
+      <div class="fi"><label>Bin ID</label><input type="text" id="set-binid" placeholder="6650f2abc9b08e4f..."/></div>
+      <div class="fi"><label>Master Key</label><input type="password" id="set-key" placeholder="$2a$10$..."/></div>
+    </div>
+
+    <button class="btn-primary" onclick="saveSetup()">💾 Guardar configuración</button>
+
+    <div class="setup-card" style="border-color:rgba(224,90,74,.3)">
+      <h3 style="color:var(--acc)">⚠️ Primer uso</h3>
+      <p>Tras configurar JSONBin, entra con tu contraseña y pulsa <strong>Publicar</strong> para subir los empleos actuales de Labora al bin. A partir de ahí, Labora los cargará automáticamente.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     MAIN SCREEN
+══════════════════════════════ -->
+<div id="screen-main" class="screen">
+  <div class="main-hdr">
+    <div class="main-hdr-logo">
+      <svg viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="28" width="48" height="27" rx="6" stroke="white" stroke-width="4" fill="none"/>
+        <path d="M22 28V24a6 6 0 016-6h8a6 6 0 016 6v4" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <line x1="8" y1="42" x2="56" y2="42" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+        <rect x="27" y="38" width="10" height="8" rx="2.5" fill="white"/>
+        <path d="M32 24V16M28 20l4-4 4 4" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1>Empleos</h1>
+    <span class="hdr-badge" id="jobs-count">0</span>
+    <button class="btn-sec" onclick="doLogout()" style="padding:7px 11px;font-size:12px">Salir</button>
+  </div>
+
+  <div class="main-toolbar">
+    <div class="sync-status">
+      <span id="sync-label">Sin sincronizar</span>
+      <span id="sync-time"></span>
+    </div>
+    <button class="btn-sync" id="btn-pull" onclick="pullFromBin()">⬇ Cargar</button>
+    <button class="btn-sync" id="btn-push" onclick="pushToBin()" style="background:var(--acc-bg);border-color:rgba(224,90,74,.3);color:var(--acc)">⬆ Publicar</button>
+    <button class="btn-add-job" onclick="openForm(null)">+ Nuevo</button>
+  </div>
+
+  <div id="job-list"></div>
+</div>
+
+<!-- ══════════════════════════════
+     FORM MODAL
+══════════════════════════════ -->
+<div id="modal-form">
+  <div class="form-sheet">
+    <div class="form-hdr">
+      <h2 id="form-title">Nuevo empleo</h2>
+      <button class="form-x" onclick="closeForm()">✕</button>
+    </div>
+    <div class="form-body">
+      <div class="fi"><label>Título *</label><input type="text" id="f-title" placeholder="Técnico/a de laboratorio"/></div>
+      <div class="fi"><label>Empresa</label><input type="text" id="f-company" placeholder="Empresa · Jerez Centro"/></div>
+      <div class="form-row">
+        <div class="fi"><label>Sector</label><input type="text" id="f-sector" placeholder="Ventas"/></div>
+        <div class="fi"><label>Salario €/mes *</label><input type="number" inputmode="decimal" id="f-salary" placeholder="1800"/></div>
+      </div>
+      <div class="form-row">
+        <div class="fi"><label>Dificultad</label>
+          <select id="f-diff">
+            <option value="easy">Fácil entrada</option>
+            <option value="medium">Entrada media</option>
+            <option value="hard">Alta formación</option>
+          </select>
+        </div>
+        <div class="fi"><label>Barrera</label>
+          <select id="f-barrier">
+            <option value="baja">Baja</option>
+            <option value="media">Media</option>
+            <option value="alta">Alta</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fi"><label>Ciudad</label>
+          <select id="f-city">
+            <option value="">Jerez</option>
+            <option value="Sevilla">Sevilla</option>
+          </select>
+        </div>
+        <div class="fi"><label>Sin coche</label>
+          <select id="f-nocarro">
+            <option value="false">No</option>
+            <option value="true">Sí</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fi"><label>★ Titulación ayuda</label>
+          <select id="f-star">
+            <option value="false">No</option>
+            <option value="true">Sí</option>
+          </select>
+        </div>
+        <div class="fi"><label>✓ Verificado</label>
+          <select id="f-verified">
+            <option value="false">No</option>
+            <option value="true">Sí</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fi"><label>Latitud *</label><input type="number" inputmode="decimal" id="f-lat" placeholder="36.6867" step="0.00001"/></div>
+        <div class="fi"><label>Longitud *</label><input type="number" inputmode="decimal" id="f-lng" placeholder="-6.1380" step="0.00001"/></div>
+      </div>
+      <p class="map-hint">💡 Busca la dirección en Google Maps, pulsa larga y copia las coordenadas</p>
+      <div class="fi"><label>Descripción</label><textarea id="f-desc" placeholder="Condiciones, horario, requisitos..."></textarea></div>
+      <div class="fi"><label>Habilidades transferibles</label><textarea id="f-tr" placeholder="Por qué encaja el perfil del usuario"></textarea></div>
+      <div class="fi"><label>Etiquetas (separadas por coma)</label><input type="text" id="f-tags" placeholder="Indefinido, Sin experiencia, Comisiones"/></div>
+      <div class="fi"><label>URL de la oferta</label><input type="url" id="f-url" placeholder="https://es.indeed.com/..."/></div>
+    </div>
+    <div class="form-foot">
+      <button class="btn-sec" onclick="closeForm()">Cancelar</button>
+      <button class="btn-primary" onclick="saveJob()">Guardar empleo</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var JSONBIN_URL = 'https://api.jsonbin.io/v3/b/';
+var cfg = {};
+var localJobs = [];
+var editingId = null;
+
+/* ── PERSISTENCIA ── */
+function loadCfg(){
+  cfg = JSON.parse(localStorage.getItem('labora_admin_cfg') || '{}');
+  cfg.pwd = cfg.pwd || 'labora2024';
+  cfg.binId = cfg.binId || '';
+  cfg.binKey = cfg.binKey || '';
+}
+function saveCfg(){ localStorage.setItem('labora_admin_cfg', JSON.stringify(cfg)); }
+function loadLocalJobs(){ localJobs = JSON.parse(localStorage.getItem('labora_admin_jobs') || '[]'); }
+function saveLocalJobs(){ localStorage.setItem('labora_admin_jobs', JSON.stringify(localJobs)); }
+
+/* ── SCREENS ── */
+function show(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+}
+function goLock(){ show('lock'); }
+function goSetup(){
+  loadCfg();
+  document.getElementById('set-binid').value = cfg.binId || '';
+  document.getElementById('set-key').value = cfg.binKey || '';
+  show('setup');
+}
+function goMain(){ show('main'); renderJobList(); }
+function doLogout(){ goLock(); }
+
+/* ── LOGIN ── */
+function doLogin(){
+  loadCfg();
+  var v = document.getElementById('pwd-input').value;
+  if(v === cfg.pwd){
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('lock-err').textContent = '';
+    loadLocalJobs();
+    goMain();
+  } else {
+    document.getElementById('lock-err').textContent = 'Contraseña incorrecta';
+    document.getElementById('pwd-input').value = '';
+  }
+}
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('pwd-input').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') doLogin();
+  });
+});
+
+/* ── SETUP ── */
+function saveSetup(){
+  loadCfg();
+  var pwd = document.getElementById('set-pwd').value.trim();
+  if(pwd) cfg.pwd = pwd;
+  cfg.binId = document.getElementById('set-binid').value.trim();
+  cfg.binKey = document.getElementById('set-key').value.trim();
+  saveCfg();
+  showToast('Configuración guardada ✓', 'ok');
+  setTimeout(goLock, 1200);
+}
+
+/* ── JSONBIN ── */
+async function pullFromBin(){
+  loadCfg();
+  if(!cfg.binId || !cfg.binKey){
+    showToast('Configura JSONBin primero', 'err');
+    return goSetup();
+  }
+  setBtnLoading('btn-pull', '⏳ Cargando…');
+  try{
+    var r = await fetch(JSONBIN_URL + cfg.binId + '/latest', {
+      headers:{'X-Master-Key': cfg.binKey, 'X-Bin-Meta': 'false'}
+    });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    var data = await r.json();
+    if(Array.isArray(data)){
+      localJobs = data;
+      saveLocalJobs();
+      renderJobList();
+      setSyncStatus('ok', '⬇ Cargado desde JSONBin', new Date());
+      showToast(localJobs.length + ' empleos cargados ✓', 'ok');
+    } else {
+      throw new Error('Formato inesperado');
+    }
+  } catch(e){
+    showToast('Error al cargar: ' + e.message, 'err');
+    setSyncStatus('err', 'Error al cargar');
+  }
+  resetBtn('btn-pull', '⬇ Cargar');
+}
+
+async function pushToBin(){
+  loadCfg();
+  if(!cfg.binId || !cfg.binKey){
+    showToast('Configura JSONBin primero', 'err');
+    return goSetup();
+  }
+  setBtnLoading('btn-push', '⏳ Publicando…');
+  try{
+    var r = await fetch(JSONBIN_URL + cfg.binId, {
+      method: 'PUT',
+      headers:{
+        'Content-Type': 'application/json',
+        'X-Master-Key': cfg.binKey
+      },
+      body: JSON.stringify(localJobs)
+    });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    setSyncStatus('ok', '⬆ Publicado en JSONBin', new Date());
+    showToast('Publicado — todos verán los cambios ✓', 'ok');
+  } catch(e){
+    showToast('Error al publicar: ' + e.message, 'err');
+    setSyncStatus('err', 'Error al publicar');
+  }
+  resetBtn('btn-push', '⬆ Publicar');
+}
+
+/* ── JOB LIST ── */
+var diffLabel = {easy:'Fácil', medium:'Media', hard:'Formación'};
+function renderJobList(){
+  var el = document.getElementById('job-list');
+  document.getElementById('jobs-count').textContent = localJobs.length;
+  if(!localJobs.length){
+    el.innerHTML = '<div class="empty-state"><div>📭</div><p>Sin empleos todavía.<br/>Pulsa <strong>+ Nuevo</strong> para añadir<br/>o <strong>⬇ Cargar</strong> para traer los del bin.</p></div>';
+    return;
+  }
+  el.innerHTML = '';
+  localJobs.forEach(function(job){
+    var row = document.createElement('div');
+    row.className = 'job-row';
+    row.dataset.diff = job.difficulty;
+    row.innerHTML =
+      '<div class="job-row-info">' +
+        '<div class="job-row-title">' + escHtml(job.title) + '</div>' +
+        '<div class="job-row-meta">' + escHtml(job.company || '') + ' · ' + (diffLabel[job.difficulty] || '') + (job.ciudad ? ' · ' + job.ciudad : '') + '</div>' +
+      '</div>' +
+      '<div class="job-row-salary">' + (job.salary || '—') + ' €</div>' +
+      '<div class="job-row-actions">' +
+        '<button class="btn-edit" title="Editar">✏️</button>' +
+        '<button class="btn-del" title="Eliminar">🗑</button>' +
+      '</div>';
+    row.querySelector('.btn-edit').onclick = function(){ openForm(job.id); };
+    row.querySelector('.btn-del').onclick = function(){ deleteJob(job.id); };
+    el.appendChild(row);
+  });
+}
+
+function deleteJob(id){
+  if(!confirm('¿Eliminar este empleo? Se publicará al pulsar ⬆ Publicar.')) return;
+  localJobs = localJobs.filter(function(j){ return j.id !== id; });
+  saveLocalJobs();
+  renderJobList();
+  showToast('Empleo eliminado. Recuerda Publicar.', 'ok');
+}
+
+/* ── FORM ── */
+function openForm(id){
+  editingId = id;
+  document.getElementById('form-title').textContent = id ? 'Editar empleo' : 'Nuevo empleo';
+  var job = id ? localJobs.find(function(j){ return j.id === id; }) : null;
+  setField('f-title',    job ? job.title : '');
+  setField('f-company',  job ? job.company : '');
+  setField('f-sector',   job ? job.sector : '');
+  setField('f-salary',   job ? job.salary : '');
+  setField('f-diff',     job ? job.difficulty : 'easy');
+  setField('f-barrier',  job ? job.barrier : 'baja');
+  setField('f-city',     job ? (job.ciudad || '') : '');
+  setField('f-nocarro',  job ? String(job.nocarro) : 'false');
+  setField('f-star',     job ? String(job.star) : 'false');
+  setField('f-verified', job ? String(job.verified) : 'false');
+  setField('f-lat',      job ? job.lat : '');
+  setField('f-lng',      job ? job.lng : '');
+  setField('f-desc',     job ? job.desc : '');
+  setField('f-tr',       job ? job.transferable : '');
+  setField('f-tags',     job ? (job.tags || []).join(', ') : '');
+  setField('f-url',      job ? (job.applyUrl || '') : '');
+  document.getElementById('modal-form').classList.add('open');
+  setTimeout(function(){ document.getElementById('f-title').focus(); }, 100);
+}
+
+function closeForm(){
+  document.getElementById('modal-form').classList.remove('open');
+  editingId = null;
+}
+
+function saveJob(){
+  var title = getField('f-title').trim();
+  var salary = parseFloat(getField('f-salary'));
+  var lat = parseFloat(getField('f-lat'));
+  var lng = parseFloat(getField('f-lng'));
+  if(!title){ showToast('El título es obligatorio', 'err'); return; }
+  if(!salary || isNaN(salary)){ showToast('El salario es obligatorio', 'err'); return; }
+  if(isNaN(lat) || isNaN(lng)){ showToast('Las coordenadas son obligatorias', 'err'); return; }
+
+  var diff = getField('f-diff');
+  var barrier = getField('f-barrier');
+  var bScore = {baja:1,media:2,alta:3}[barrier] || 1;
+  var dScore = {easy:1,medium:2,hard:3}[diff] || 1;
+  var tags = getField('f-tags').split(',').map(function(t){ return t.trim(); }).filter(Boolean);
+  var ciudad = getField('f-city') || undefined;
+
+  var job = {
+    id: editingId || Date.now(),
+    title: title,
+    company: getField('f-company'),
+    sector: getField('f-sector') || 'General',
+    salary: salary,
+    difficulty: diff,
+    barrier: barrier,
+    barrierScore: bScore,
+    diffScore: dScore,
+    star: getField('f-star') === 'true',
+    nocarro: getField('f-nocarro') === 'true',
+    verified: getField('f-verified') === 'true',
+    lat: lat,
+    lng: lng,
+    desc: getField('f-desc'),
+    transferable: getField('f-tr'),
+    tags: tags,
+    applyUrl: getField('f-url') || ''
+  };
+  if(ciudad) job.ciudad = ciudad;
+
+  if(editingId){
+    var idx = localJobs.findIndex(function(j){ return j.j === editingId; });
+    var i = localJobs.findIndex(function(j){ return j.id === editingId; });
+    if(i >= 0) localJobs[i] = job; else localJobs.push(job);
+  } else {
+    localJobs.push(job);
+  }
+  saveLocalJobs();
+  renderJobList();
+  closeForm();
+  showToast((editingId ? 'Empleo actualizado' : 'Empleo añadido') + '. Recuerda Publicar ⬆', 'ok');
+}
+
+/* ── SYNC STATUS ── */
+function setSyncStatus(type, msg, date){
+  var lbl = document.getElementById('sync-label');
+  var time = document.getElementById('sync-time');
+  lbl.className = type;
+  lbl.textContent = msg;
+  time.textContent = date ? date.toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'}) : '';
+}
+function setBtnLoading(id, txt){ var b = document.getElementById(id); b.textContent = txt; b.disabled = true; }
+function resetBtn(id, txt){ var b = document.getElementById(id); b.textContent = txt; b.disabled = false; }
+
+/* ── TOAST ── */
+var _toastT;
+function showToast(msg, type){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(function(){ el.classList.remove('show'); }, 2800);
+}
+
+/* ── HELPERS ── */
+function getField(id){ return document.getElementById(id).value; }
+function setField(id, val){ document.getElementById(id).value = val === undefined || val === null ? '' : val; }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── INIT ── */
+loadCfg();
+loadLocalJobs();
+</script>
+</body>
+</html>
